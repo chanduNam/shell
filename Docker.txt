@@ -1,0 +1,194 @@
+﻿1)PHYSICAL MATCHINE: performace will be high but Resource is not utilized 100% it means less utilization and hence memmory consumed less so the west of memmory .
+2)virtul machine: performace will be high but over Resource Utilization. 
+3)container: high performace and proper resource utilization.
+3)container: high performace and proper resource utilization. docker is container tool.
+
+docker isntallation:
+---------------------
+4) sudo yum install docker -y (installed on workstation)
+-> here docker engine will be installed.
+5)Complete!
+[ec2-user@webserver ~]$ sudo systemctl enable docker 
+Created symlink from /etc/systemd/system/multi-user.target.wants/docker.service to /usr/lib/systemd/system/docker.service.
+6)by default only root user can run docker commands. inorder to access/run docker commands by other user. create a group. 
+ex: sudo groupadd docker
+7)sudo usermod -a -G docker ec2-user
+8)sudo systemctl start docker
+9) docker --helpp
+10)[ec2-user@webserver ~]$ docker ps
+Got permission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock: Get http://%2Fvar%2Frun%2Fdocker.sock/v1.26/containers/json: dial unix /var/run/docker.sock: connect: permission denied
+ id <-
+11)disconnect the terminal and relogin.
+12)[ec2-user@webserver ~]$ docker ps
+
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+
+13)Inorder launch a container we need a IMAGE.
+14) There will be base images already availabe. using those images we can create our own images.
+15)earlier we used to deploy student.war file on OS and installing java
+16)now we will create an image and keep java war file pack it and download the pack and execute it.
+
+17)install mariadb image.
+docker run -e MYSQL_ROOT_PASSWORD=root  mariadb
+18)docker ps
+19)docker inspect dfa1ef95eb1c  -> gives ip address. and using ip address we can connect to the database.
+ip adress : 172.17.0.2
+20)mysql -h 172.17.0.2 -u root -proot -> log in to the db
+21)if we want to  remove a container use below commands
+22)docker rm -f dfa1ef95eb1c (container id)
+23)docker ps -a -> gives all the containers
+24)docker run -d -e MYSQL_ROOT_PASSWORD=root  mariadb  -> runs maria db in the backround.
+25)docker logs -f 83f116c95382 (container id) -> we can see the logs of the containers
+26)by default docker will not run the shell commands. we have to specify explicitely.
+ex: 1)docker run centos id 
+2)docker run mariadb pwd
+27)to create our own images we should have docker account
+  ( docker id =namwade , pwd =Chandu123)
+28)Image formate : uaserid/imagesname:tag
+  ex: namwade/test:1
+29)docker build -t namwade/test:1 .  (this one will creates an image called namwade/test)
+30)docker images  ->> displays all the images.
+31)[ec2-user@webserver 01-sample]$ docker push namwade/test:1
+The push refers to a repository [docker.io/namwade/test]
+df928d7935fd: Preparing 
+ab384e1e20e0: Preparing 
+1d31b5806ba4: Preparing 
+denied: requested access to the resource is denied
+32)inor] to push the image to your account . first we should login.
+33)docker login
+[ec2-user@webserver 01-sample]$ docker login
+Login with your Docker ID to push and pull images from Docker Hub. If you don't have a Docker ID, head over to https://hub.docker.com to create one.
+Username: namwade
+Password: 
+Login Succeeded
+35)to test the image , create an instance and install docker on it.
+   sudo yum install docker -y
+   sudo groupadd docker
+   sudo su - ec2-user
+   sudo systemctl start docker
+   docker ps
+   docker run -d namwade/test:1
+   docker inspect 7cb6b17aae2d
+   curl 172.17.0.2 -> gives hellow workd output 	
+36) to  access the dockerfile outsit the wotld you have publush the system port with container port.
+ex:docker run -p 80:80 -d  namwade/test:1
+
+Kuberntes
+===============
+ 1)sudo yum install kubectl -y  (on workstation)
+ 
+ 2)gcloud container clusters get-credentials mycluster --zone us-central1-a --project euphoric-patrol-211105
+ 3)to checck whethe we are able to connect to cluster or not use below command.
+  kubectl get nodes
+4)kubectl cluster-info
+ 
+ [ec2-user@webserver ~]$ kubectl cluster-info
+Kubernetes master is running at https://35.239.63.194
+GLBCDefaultBackend is running at https://35.239.63.194/api/v1/namespaces/kube-system/services/default-http-backend:http/proxy
+Heapster is running at https://35.239.63.194/api/v1/namespaces/kube-system/services/heapster/proxy
+KubeDNS is running at https://35.239.63.194/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
+kubernetes-dashboard is running at https://35.239.63.194/api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy
+Metrics-server is running at https://35.239.63.194/api/v1/namespaces/kube-system/services/https:metrics-server:/proxy
+
+5)kubectl get nodes -o wide -> gives more options.
+6)how to put a node under maintainace
+ a)cordon : Mark noda as unschedulable
+ b)uncordon: Mark node as schedulable
+ c)drain node in preperation for maintainace
+ d)taint : update the taint on one or more nodes.
+7)[ec2-user@webserver ~]$ kubectl cordon gke-mycluster-default-pool-b47ad9ab-44zz 
+node/gke-mycluster-default-pool-b47ad9ab-44zz cordoned
+8)[ec2-user@webserver ~]$ kubectl get nodes -o wide
+NAME                                       STATUS                     ROLES    AGE   VERSION        INTERNAL-IP   EXTERNAL-IP       OS-IMAGE                             KERNEL-VERSION   CONTAINER-RUNTIME
+gke-mycluster-default-pool-b47ad9ab-44zz   Ready,SchedulingDisabled   <none>   16h   v1.9.7-gke.6   10.128.0.3    104.198.168.116   Container-Optimized OS from Google   4.4.111+         docker://17.3.2
+9) kubectl uncordon gke-mycluster-pool-1-0ac06b0e-tr8n
+10)kubectl drain gke-mycluster-pool-1-0ac06b0e-tr8n --ignore-daemonsets
+11)kubectl label nodes gke-mycluster-default-pool-b47ad9ab-44zz env=DEV
+12)kubectl label nodes gke-mycluster-pool-1-0ac06b0e-tr8n  env=PROD
+13)[ec2-user@webserver ~]$ kubectl get nodes --show-labels
+NAME                                       STATUS   ROLES    AGE   VERSION        LABELS
+gke-mycluster-default-pool-b47ad9ab-44zz   Ready    <none>   17h   v1.9.7-gke.6   beta.kubernetes.io/arch=amd64,beta.kubernetes.io/fluentd-ds-ready=true,beta.kubernetes.io/instance-type=n1-standard-1,beta.kubernetes.io/os=linux,cloud.google.com/gke-nodepool=default-pool,env=DEV,failure-domain.beta.kubernetes.io/region=us-central1,failure-domain.beta.kubernetes.io/zone=us-central1-a,kubernetes.io/hostname=gke-mycluster-default-pool-b47ad9ab-44zz
+gke-mycluster-pool-1-0ac06b0e-tr8n         Ready    <none>   17h   v1.9.7-gke.6   beta.kubernetes.io/arch=amd64,beta.kubernetes.io/fluentd-ds-ready=true,beta.kubernetes.io/instance-type=n1-standard-1,beta.kubernetes.io/os=linux,cloud.google.com/gke-nodepool=pool-1,env=PROD,failure-domain.beta.kubernetes.io/region=us-central1,failure-domain.beta.kubernetes.io/zone=us-central1-a,kubernetes.io/hostname=gke-mycluster-pool-1-0ac06b0e-tr8n
+[ec2-user@webserver ~]$ 
+14)how to create pod
+	kubectl run httpd --image=httpd
+15)[ec2-user@webserver ~]$ kubectl get pods -o wide
+NAME                       READY   STATUS    RESTARTS   AGE    IP          NODE                                 NOMINATED NODE
+myhttpd-7869f858f9-wcf9c   1/1     Running   0          4m2s   10.20.1.9   gke-mycluster-pool-1-0ac06b0e-tr8n   <none>
+
+16)[ec2-user@webserver ~]$ curl 10.20.1.9
+<html><body><h1>It works!</h1></body></html>
+17)to know the specication of a pod use below command.
+   kubectl get pod myhttpd-7869f858f9-wcf9c -o yaml
+
+18)we can create pod from a file.
+	ex: kubectl create -f 01-sample.yml
+
+ content of the file is :
+ --------------------------
+ apiVersion: v1
+kind: Pod
+metadata:
+  name: myhttpd
+spec:
+  containers:
+    - name: myhttpd
+      image: httpd
+--------------------
+19)kubectl describe pod myhttpd1 -> gives more details about the pod.
+20)kubectl logs multi -> gives logs details of multi pod
+21)kubectl delete pod multi - deletes the pod 
+22)mysql -h 10.20.1.13 -u root -ppassword
+23)if we wnat to execute any command in container we use 'exec' command.
+  ex: kubectl exec multi uptime
+  
+[ec2-user@webserver pods]$ kubectl exec multi uptime
+Defaulting container name to db.
+Use 'kubectl describe pod/multi -n default' to see all of the containers in this pod.
+ 12:56:30 up 20:58,  0 users,  load average: 0.06, 0.07, 0.08
+24)if we want to execute the command on perticular container we mention the container name . 
+   ex: kubectl exec multi uptime -c app
+25) 12:59:29 up 21:01,  0 users,  load average: 0.00, 0.03, 0.06
+[ec2-user@webserver pods]$ kubectl exec multi hostname -c app
+multi
+[ec2-user@webserver pods]$ kubectl exec multi hostname -c db
+multi
+26)kubectl exec multi -c app -- yum install mariadb -y   => installing mariadb client on app container.
+27)kubectl exec multi -it(interactive) -c app -- mysql -h multi -u root -ppassword   =>from app container we are able to connet mysql.(conatainer to conatainer connection)
+28)kubectl get rs -> gives replication set. (rs -replication set, rc -replication controller)
+29)basically we create the pods using replicationset or replication controller.
+30)watch kubectl get pods
+ pods
+ ------
+ pods are the automic unit on the kubernetes platform. when we create deployment on kubernetes , the deployment creates pods with containers 
+ inside them.each pod is tied to the node where it is scheduled, and remains there until termination(according to restart policy) or deletion.
+ incase of node failure ,identical pods are scheduled on other availabe nodes in the cluster.
+ 
+NOTE: 
+Replica Set ensures how many replica of pod should be running. It can be considered as a replacement of replication controller.
+ The key difference between the replica set and the replication controller is, the replication controller only supports equality-based selector whereas
+ the replica set supports set-based selector.
+
+ Services
+ -----------
+ 
+ 1)kubectl create -f 01-service.yml
+ 2)watch kubectl get all
+ 3)kubectl delete rs httpd-rc -> deletes replicaset
+ 4)type: LoadBalancer -> this code will create external ip address using which we can hit the service publicly.
+   it means loadbalancer Exposes the service externally using a cloud provider’s load balancer
+ 
+ex:
+NAME                        TYPE           CLUSTER-IP	   EXTERNAL-IP     PORT(S)        AGE
+service/httpd-ext-service   LoadBalancer   10.23.250.3     35.188.184.51(with loadbalanceer)   80:32630/TCP   17m
+service/httpd-service       ClusterIP	   10.23.246.117   <none>(there is no external ip since we are not using type:LoadBalancer loadbalanceer)  80/TCP         68m
+-----------------
+
+pod to service communication
+-----------------------------
+a)create pod first.
+b) kubectl exec -it centos-bash(its pod name) -- bash
+c)the above command will goto bash mode in centos
+d)ping httpd-service (this service name) -> will get ip addres of the service
+output:
+PING 10.23.250.3 (10.23.250.3) 56(84) bytes of data.
