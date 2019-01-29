@@ -1,0 +1,61 @@
+grep -E 'root|password' password -> searches words root,password in password file
+
+cut 
+grep
+
+
+
+--------------------------------
+i	Insert at cursor (goes into insert mode)
+a	Write after cursor (goes into insert mode)
+A	Write at the end of line (goes into insert mode)
+ESC	Terminate insert mode
+u	Undo last change
+U	Undo all changes to the entire line
+o	Open a new line (goes into insert mode)
+dd
+3dd	Delete line
+Delete 3 lines.
+D	Delete contents of line after the cursor
+C	Delete contents of a line after the cursor and insert new text. Press ESC key to end insertion.
+dw
+4dw	Delete word
+Delete 4 words
+cw	Change word
+x	Delete character at the cursor
+r	Replace character
+R	Overwrite characters from cursor onward
+s	Substitute one character under cursor continue to insert
+S	Substitute entire line and begin to insert at the beginning of the line
+~	Change case of individual character
+Make sure you press the right command otherwise you will end up making undesirable changes to the file. You can also enter the insert mode by pressing a, A, o, as required.
+
+Moving within a file
+You need to be in the command mode to move within a file. The default keys for navigation are mentioned below else; You can also use the arrow keys on the keyboard.
+
+Keystroke	Use
+k	Move cursor up
+j	Move cursor down
+h	Move cursor left
+l	Move cursor right
+Saving and Closing the file
+You should be in the command mode to exit the editor and save changes to the file.
+
+Keystroke	Use
+Shift+zz	Save the file and quit
+:w	Save the file but keep it open
+:q	Quit without saving
+:wq	Save the file and quit
+
+----------------------------------
+:set ic -> enable case insensivity
+:set noic -> disable case insensivity
+:set nu
+:set nonu
+/seach a words
+:/ seach a word
+:%s/serch/replace/
+:%s/serch/replace/g
+:%s/serch/replace/gi -> % is for all the lines
+:1s/seach/replace/
+:w /tem/newpassword -> save as the file 
