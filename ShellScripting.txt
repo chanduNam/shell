@@ -1,0 +1,404 @@
+Escape squence
+--------------
+1)
+\n - new line
+\t -new tab (horizontal tab)
+\v -new tab (vertica tab)
+\e - new color
+
+To see more options use below command
+->man echo
+DESCRIPTION
+       Echo the STRING(s) to standard output.
+
+       -n     do not output the trailing newline
+
+       -e     enable interpretation of backslash escapes
+
+       -E     disable interpretation of backslash escapes (default)
+
+       --help display this help and exit
+
+       --version
+              output version information and exit
+
+       If -e is in effect, the following sequences are recognized:
+
+       \\     backslash
+
+       \a     alert (BEL)
+
+       \b     backspace
+
+       \c     produce no further output
+
+       \e     escape
+
+ex:a) echo -e "chandu\nnamwade" (new lline)
+o/p :
+chandu
+chandu
+b)echo -e "chandu\nnamwade"
+o/p 
+namwade chandu.
+
+2) -e -> enables escape sequnce ( when we use -e option we should use the input in doule qoute-"")
+3)color types. Background(font color) and foreground(console/terminal color)
+4)-n d new line
+
+		FG			BG
+Red		31			41
+Green	32			42
+yellow	33			43
+Blue	34			44	
+Mangeta	35			45	
+Cyan	36			46
+
+To set default color setting use "0m"
+
+ex: echo -e "\e[33mHI chandu"  (no closing bracket)
+o/p -> Hi chandu (in yellow color)
+
+
+Mail
+--------
+1) sending main
+mail -s (subject)Test Mail ec2use2@locahost (for same user we localhost, if other user we should specify it)
+
+ex:
+mail -s My Test mail ec2use2@locahost (enter and type the mail content)
+hi
+chandu
+how are you
+. (type dot and enter. and the mail will be sent)
+
+
+
+2)check mail
+To check mail just give mail command
+3) to send mail other user 
+mail -s Hell SIR11732@locahost
+if you want to reply the mail just open the mail and at the end type ->Reply
+
+wall -> command used to communicate to the all users in the same system
+
+Exit status
+-----------
+range 0-255
+0 -succesfull
+1-125 unsuccessful/partial succesfull.
+we should use 0-125 only. other numbers are used by ysstem.
+
+kill -l gives kill signal
+
+128 is kill signal number
+128+n =$? (exit status_
+if exit status is 130
+128+n=130
+n =130 -128
+n=2
+it means we have sent 2 signla  . and signal 2 idicates interupt.
+
+shell has specail charectors which have specail meaning . if we use them withoud double quotes ,they exbhit their specail meaning..
+
+alphabet, _ ,numbers -> are only normal charectors. others have own specail meaning.
+we can disable the speciality of the charectors in three ways.
+1)Backslash
+2)single quotes
+3)double quotes	
+
+ex:echo \* 
+o/p-> *
+
+if we use the specail charectors in signal they loose their speciality
+ex: echo 'today date is `date`'
+o/p:
+today date is `date`
+
+-> if we use double quotes the two charectors $ ,`` are treated as specail charectors . if u want to disble them use backslash(\)
+cat -n filename -> gives lines with number.
+
+head -n 15 -> gives first 15 lines
+tail -n 20 -> gives last 20 lines
+-------------------------------
+
+grep -e(first word) user -e admin(second word) passwd (file name to be searched in) --color=auto
+
+grep -e hello -e hi sample.txt 
+
+grep -e abc -e Abcx -e ABC  sample.txt  -i (case insensitive case)
+
+o/p -> all the words which has abc .
+
+if want exact pattern and case insensitivety use -w option.
+->
+ex :grep -e abc -e Abcx -e ABC  sample.txt  -w -i
+
+if we want to search the lines with axact word use -x option
+grep -e abc -e Abcx -e ABC  sample.txt -x
+
+grep root passwd -B 1 -> gives the line before the line of the word
+
+
+
+cat sample.txt | sort
+
+cat sample.txt | sort -n -r -> revers sort
+cat sample.txt | sort -n |uniq ->print ony uniq lines.
+
+
+
+^ (cap symbol) denotes starting of the line of a file.
+ex: grep ^root passwd  -> greps lines starting with root word.
+ex: grep ^root passwd -v -> greps lines which are not having the word root.
+$ denotes end of the and end of a file.
+ex: grep bash$ passwd -> greps all the lines ending with bash
+^$ denotes empty line.
+
+grep empty lines:
+ex: cat passwd |grep -v
+grep all the non empty lines
+ex: cat passwd |grep -v ^$
+------------------------------------
+
+cut command:
+
+ echo -e "a\tb\tc\td"
+ o/p : a	b	c	d
+
+ if we want to cat first column use below command.
+ 
+echo -e "a\tb\tc\td" |cut -f1
+o/p: a
+
+ex: echo -e "a\tb\tc\td\n1\t2\t3\t4" |cut -f1
+o/p :
+a	b	c	d
+1	2	3	4
+
+ echo -e "a\tb\tc\td\n1\t2\t3\t4" |cut -f1
+
+ o/p :
+a
+1
+
+If we want to grep column 1,4 use below command.
+echo -e "a\tb\tc\td\n1\t2\t3\t4" |cut -f1,4
+
+o/p:
+a 	b
+1	2
+
+if we want to give range between 1 to 3 use below command.
+echo -e "a\tb\tc\td\n1\t2\t3\t4" |cut -f1-3    -> it will grep 1 to 3 columns
+
+NOTE : \t(tab) is default delimeter.
+NOTE:  we can specify custom delimeter by using -d option.
+
+ex:  cat passwd |cut -f1 -d:  ->it will grep first column of the file which delimetered with :(colon).
+
+we can also cut the charectors.
+ex: echo HelloWorld |cut 1-5
+o/p: Hello
+
+---------------------------------------
+xargs command:
+
+this command used to convert columns to rows and rows to columns.
+ex: echo -e "1\n2\n3\n4  -it forms a single column.
+echo -e "1\n2\n3\n4 |xargs  -> it converts the column into row. 
+if want to convert row into column use below command.
+ex:echo -e "1\n2\n3\n4" |xargs -n1
+-------------------------
+sed command.
+
+sed command by default prints each line twice. to disable that , we use -n option.
+ex: sed 'p' passwd -> prints twice each line.
+sed -n 'p' passwd - no duplicate line printed.
+ sed -n '/usr/p' passwd -> greps all the lines which has the word 'usr' from passwd file.
+ 
+ Print lines matching the pattern “Jane”
+ ex: 
+ sed -n '/Jane/ p' employee.txt
+o/p :105,Jane Miller,Sales Manager
+
+
+
+Print lines starting from the 1st match of "Jason" until the 4th line:
+$ sed -n '/Jason/,4 p' employee.txt
+102,Jason Smith,IT Manager
+103,Raj Reddy,Sysadmin
+104,Anand Ram,Developer
+
+Note: If there were no matches for "Jason" in the 1st 4 lines, this
+command would print the lines that match "Jason" after the 4th line.
+Print lines starting from the 1st match of "Raj" until the last line:
+$ sed -n '/Raj/,$ p' employee.txt
+103,Raj Reddy,Sysadmin
+104,Anand Ram,Developer
+105,Jane Miller,Sales Manager
+Print lines starting from the line matching "Raj" until the line
+matching "Jane":
+$ sed -n '/Raj/,/Jane/ p' employee.txt
+103,Raj Reddy,Sysadmin
+104,Anand Ram,Developer
+105,Jane Miller,Sales Manager
+
+
+Print the line matching "Jason" and 2 lines immediately after
+that:
+$ sed -n '/Jason/,+2 p' employee.txt
+102,Jason Smith,IT Manager
+103,Raj Reddy,Sysadmin
+104,Anand Ram,Developer
+
+
+	 
+if u want to execute lot of commands in a single line use \(backslash) for the continuation of the same file.
+You can also execute multiple sed commands in the command line by
+grouping them together using { }: as shown below.
+
+sed -n '{
+/^root/ p
+/^nobody/ p
+}' /etc/passwd
+
+
+Note: Sed never modifies the original file. It always prints the output
+to stdout. If you want to save the changes, you should redirect the
+output to a file by explicitly specifying > filename.txt.
+
+
+
+ sed -n '2 p' passwd -> prints 2nd line of the file.
+ sed -n '1,5 p' passwd - print lines ranging from 1 to 5
+ sed -n '4,$ p' passwd -> print the lines from 4 to end of the files. here $ denotes end of the file.
+ sed -n '1~2 p' passwd -> prints first line and next alternative lines (ex ,1,3,5,7,9 etc)
+ sed -n '2~2 p'passwd  matches 2,4,6,8, etc.
+ 1~3 matches 1,4,7,10, etc.
+ 2~3 matches 2,5,8,11, etc
+	  
+	  
+	 
+	  
+	  sed 'd' sample.txt -deletes all and print nothing/empty  
+
+	  sed '/apache/ d' sample.txt  -> deletes the lines with the apache and print remaining files.
+	  
+	NOTE: while using d (delete option) it wont delete actual file content but in the out put only we can feel the difference . and acutaal file will be unchanged . if want to reflect actual file we have to 'i' option. it means the file will be modified.
+	
+	
+sed -e ' s/root/chandu/ ' sample.txt -> finds root word/s and replace with chandu
+sed -e '24 s/apache/chandu/ ' sample.txt -> this one will replace apache word with chandu at line no 24.
+
+sed  -i ' s/usr/NIRU/ ' sample.txt -> As we are using i option changes will directly to the file.
+
+sed -e  ' s/usr// ' sample.txt -> replace with user with empty/null
+
+echo Anial aple arrange |sed -e 's/a/A/ -> replaces a with A but first occurrence will be replaced. not others
+echo Anial aple arrange |sed -e 's/a/A/g -> repaces a with A for all the occurrences.
+echo anial aple arrange |sed -e 's/a/A/3' only third occurrence will be replaced with A.
+sed -e 's/chandu/Vikki/' sample -> if file Chandu (C caps) in ur file. this wont replace Chandu with Vikki. inorder to do happen so we have to use i flag
+sed -e 's/chandu/Vikki/i' sample
+
+ sed '2 a Hii chandu' sample.txt  -> appends(inserts to next ine) Hii chandu at line 2
+ sed '2 i Hii chandu' sample.txt  -> inserts at line 2.
+ sed '4 c Hii chandu' sample.txt -> repalces the 4th line with given string.
+ 
+  sed -i -e '/^root/ s/no/yes/' sample.txt -> finds the line starting with root and repl no with and save the changes to the file.
+  e - means enabale a command.
+
+
+
+echo Apple animal air 
+p -print
+d -delete
+s-substitute
+a- append
+c-change
+i-insert
+
+
+-------------------
+Variable
+===========
+unset -> command unsets the variable data
+passwd --help
+
+variable properties
+------------------
+1)ReadWrite-readonly -> u can only read the variable and cant be changed.
+inode
+2)To make Local variable availbe to env user export command (parent to child)
+3)imoirt -child to parent.
+4)array variable . in array we can store multiple variable/values.
+ex:student[0]=chandu ,student[1]=vikki or student=(ram rju vikki babu)
+to access array value use ${student[0]} ,echo ${student[1]} 
+if we are trying access the which not defined,then null value ve assigned to the variable. 
+to access all the values of the array we can use @ or * 
+ex : echo ${student[@]} ,echo ${student[1]}
+To check no of values of a array , use below command.
+echo ${#student[@]} ,echo ${#student[*]}
+-> Arithematic expresssion $(())
+ex: echo $(($a + $b))
+-> free -m :-> gives availbe free memory.
+There are 4 types of commands in shell.
+1)finary file
+2)shell built in commands
+3)function
+4)alias
+
+To make a function readonly use belw command.
+readonly -f function name -> readonly -f demo
+To export a function -> export -f demo (function name)
+Import -> . scriptname -> functions in the script will get imported.
+
+
+------------------
+to convert small charectors/string to upper use below command:
+
+ex: echo abc | tr [a-z] [A-Z]
+
+for string comparision we use = or ==  ->  != or !==
+numbers comp: -eq ,-ne,-ge ,ge ,le 
+
+hostname -i -> gives host ip
+id -> gives user idicates
+
+-----------------
+taking input from user:
+1)while executing script -read command
+2)before executing script - >1) specail variable 2)getopts
+
+ls -1 script*.sh | tail -1 |sed -e 's/script//' -e  's/.sh//'
+
+here ls -1(one) script*.sh will list one file per line.
+ls -1 ->means list one file per line
+
+
+create_script() {
+
+i=$(ls -1 script*.sh | tail -1 |sed -e 's/script//' -e  's/.sh//') ;
+i=$(($i+1)) ;
+echo '#!/bin/bash' > script$i.sh; # creates script7.sh and add the '#!/bash/bin/' to the file.
+vim script$i.sh ;
+chmod 755 script$i.sh;
+echo script$i.sh
+
+}
+
+----------------
+ech0 -n "enter your name"
+
+read -p   # no new line trailing. 
+read -s -p  # silent/secrete read . u wont be able to see that what u r typing on.
+
+
+echo " good morning"
+read -p "press <ENTER> to continue....
+echo " bye"
+
+echo hi |tr [:lower:] [:upper:] #converts lower to  upper
+tr [a-z] [A-Z]  #converts lower to  upper
+
+4m is underline command.
