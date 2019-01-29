@@ -1,0 +1,242 @@
+
+SSH AND ANSIBLE 
+
+using SSH(like putty) we can connect to the remote server by using username and passowrd. but in cloud env usesr/pwd is depreciated i.e not allowed.
+
+hece we should connet to the remote server using username and key. based on the key authentication we will be able to connect to the remote server.
+while trying to connect to remote server using ssh , then ssh check the entry in its /home/ec2-user/.ssh/known_hosts file.  if server identity  (server ip or server name ) available then ssh will establish the  connection with  remote server . or else throw error
+below is the path where authentication key will be stored.
+cd /home/ec2-user/.ssh/
+cat known_hosts 
+sample o/p
+
+35.231.19.2 ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBLjRtBUg1VF6skNEcN3iQLarOMDdtv9XvOFwmof0Uxolx4JYiLfo8BD0cZcE9qAl2vzQo9VXqKETft0vK7QAXKY=
+
+cat authorized_keys (this is public key available in server : METADATA-> SSH Keys)
+
+o/p
+
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC8aFhf8Qio9S5KwtIbiW3ypHxZBnZA639WGnsFlnObcT3BZMVWc0TR8NJKuyO3fK3OqdBFOdSsBvXk1F+v3IR6U9qMRK6WiSUP3p7gLaqozcca39PqkgMvnVQctz7EFr/rb3istgnJfhvDuOY8aJ87I8/YQYLkFoZDb7JUWO1ZYq3BVpO5TpP300RBquGzfHNoqJcO4c1xRZ6xdPzMDhV4075ffhsEs7Qpv+CbfknktLBE825WQGMasMpA1JyUh4OVY69JpxC9SrsUQxAPvg3NDSTLk53P0vz40SJ2Bnb5E6oUVkBUOiuMTcxoc2y1rq+HTM8tDWyEsm74SqR+6t2h ec2-user
+
+to intall ansible use below command.
+
+sudo yum install ansible -y (installed on webserver)
+
+ansible --help
+
+ ssh -v  35.231.19.2(some ip)(to check connection)
+	
+
+ansible uses ssh in backround.
+
+to connect ansible use below command
+ ansible -i hosts(host file where all server names mentiond inorder to connect) haproxy(server name) -u ec2-user(usen name) --private-key=devops.pem -m ping (ping command wiil ping the server)
+
+ ansible -i hosts haproxy -u ec2-user --private-key=devops.pem -m ping
+
+ 
+ NOTE : pem file should not have access to others -> chmod go-wrx
+ 
+ TO test it -> SSH haproxy(server)
+ 
+ ssh -l ec2-user -i devops.pem 35.231.19.2  (when ever we trying to we have to use this sysntax .)
+ 
+ ansible -i hosts all --list-hosts   >will give total hosts
+ hosts (6):
+    dbserver
+    appserver
+    appnod1
+    dbserver2
+    haproxy
+    webserver
+
+The below host file has groups and each group have some hosts.
+ 
+ [DEV]
+appnod1
+dbserver2
+[qa]
+haproxy
+webserver
+[prod]
+dbserver
+appserver
+
+
+To get perticular group host use below command.
+
+ansible -i hosts DEV --list-hosts
+o/p
+ hosts (2):
+    appnod1
+    dbserver2
+	
+	
+	------------------------
+	
+We can filter perticular apphosts or db host by gruping as shown below (hosts file -also called as Inventory file)
+[DEV:children]
+DEVAPP
+DEVDB
+
+[DEVAPP]
+devapp1
+[DEVDB]
+devdb1
+[QAAPP]
+qaapp1
+haproxy
+[PRODDB]
+proddb1
+webserver
+[PRODapp]
+appserver1
+
+now we can get only dev hot as shown below
+ansible -i hosts DEV --list-hosts
+o/p
+ hosts (2):
+    devdb1
+    devapp1
+
+here we are following ansible command to achieve the above task. which not recommonded since we shoul go for automation.
+so here 'ansible-playbook'(ansible command) comes into picture.
+
+---------------------
+
+module (task)-> which perform an action on the server.
+ping -> checks server is accepting ssh connection or not. 
+
+	 > also check python install or not.
+	 -------
+Multiple task called as play and group of play called a playbook.
+------------------------
+ ansible --version
+ o/p
+ /etc/ansible/ansible.cfg
+
+ NOTE : this is the centrol file and we should  modify it. we can copy the file into ansible home path and make the and  use it.
+
+ once you copy the file into home/working directory then ansible refers to the local file insead centrol
+ 
+ansible -i hosts haproxy -u ec2-user --private-key=devops.pem -m ping (this is ansible command to connect the host)
+
+
+once we modify ansible.cfg file then no need to use above (entire) command
+
+
+changes in ansible.cfg
+1)Inventory file which nothing but hosts file.
+1)update the inventory file (hosts) path as shown below.
+-> inventory = /home/ec2-user/ansible/hosts
+2)remote_user = ec2-user
+3)private-key = /home/ec2-user/devops.pem (pem file path)
+now you can use below command to connect.
+
+To check the syntax of a playbook, use ansible-playbook with the --syntax-check flag
+ex: ansible-playbook --syntax-check
+To run a playbook use below command
+ansible-playbook playbook_01.yml (playbook name)
+note: we shoud the playbook from the where our private-key is available(devops.pem)
+
+------------
+hosts/inventory file with groups.
+
+[DEV:children]
+DEVAPP
+DEVDB
+
+[DEVAPP]
+devapp1
+[DEVDB]
+devdb1
+[QAAPP]
+qaapp1
+haproxy
+[PRODDB]
+proddb1
+webserver
+[PRODapp]
+appserver1
+---------
+
+->ansible all  -m ping
+
+YAML
+======
+Playbook -> A single yaml file OR group of plays' called playbook
+play -> defines a set of activites(tasks) to be run on hoost.
+Task -> A action to be performed on the host. 
+ex: execute a command
+	run a script
+	instll a package
+	shudown/restart
+	
+	
+	
+
+	we can define a veriable at play level and will access at task level . but we difine same variable at play level as well as at
+	task level then task level defined variable will be accessed rather than play level .since task level variable is local variable
+	and play level veriable is global level. so local variabl will more priority.
+	
+	
+vars_prompt is used to take the input from user. while typing the input we wont be able to see(default behaviour)
+we can enalbe this by using -> private: no  option
+
+NOTE: ansible-playbook --help
+
+we can pass the value to defined the variable in the file while executing the file. its like pass the values using special variable in linux.
+
+ex: -e URL=google.com   -> where URL the defined variable in the file .
+
+To read the input from a file we use  -> vars_files 
+
+ex: 
+vars_files:
+  -vars.yml  (this file is read )    
+
+
+ 
+ note:  ansible -i hosts haproxy -m setup  -> will give all the system facts.
+ 
+ to t connect mysql in any server you shold install client service/package that is- mariadb
+ 
+ sudo yum install mariadb -y -> after installation use below command to connet to the db that is installed on the host host server
+  mysql –h haproxy -u student –pstudent@1 -> this to connect the db using client.
+  
+  log in mysql in target hosts(haproxy) as shown below.
+  mysql -> u should log with root user.
+  if we dont want to dsplay the system facts .change -> gathering = ecplicit in ansible.cfg file
+  
+   
+ Yaml tags are  used to run perticular tat . it mean a perticular task/play level . for example below one
+
+ ansible-playbook playbooks/stack.yml --tags WEB
+ 
+ --------------------------
+ 
+ File module to  remove files/Directories 
+ 
+ - file:
+        path: /tmp/Demo
+        state: absent  
+		
+
+		here absent deletes the files/Directories.
+		
+		
+		
+in ansible storing out put into variable is called registering.
+and we register module to achieve this.
+
+Ansible all -m setup  -> ad-hoc command to get all the facts.
+
+Handlers:
+-------------
+among the task if any of the task(s) modified the action of the task will not be performed immidiately. but after all the task get completed  
+and this process is called handlers.
+
+
+inorder to run roles modify the belo path in ansible.cgf file
+
+roles_path    = /home/ec2-user/ansible/roles 
